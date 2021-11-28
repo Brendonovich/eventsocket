@@ -13,41 +13,17 @@ defmodule EventSocket.Conditions do
   def construct("channel.channel_points_custom_reward.add", user_id, _values),
     do: default(user_id)
 
-  def construct("channel.channel_points_custom_reward.remove", user_id, %{
-        "reward_id" => reward_id
-      }),
-      do:
-        ok(%{
-          "broadcaster_user_id" => user_id,
-          "reward_id" => reward_id
-        })
+  def construct("channel.channel_points_custom_reward.remove", user_id, _values),
+    do: default(user_id)
 
-  def construct("channel.channel_points_custom_reward.update", user_id, %{
-        "reward_id" => reward_id
-      }),
-      do:
-        ok(%{
-          "broadcaster_user_id" => user_id,
-          "reward_id" => reward_id
-        })
+  def construct("channel.channel_points_custom_reward.update", user_id, _values),
+    do: default(user_id)
 
-  def construct("channel.channel_points_custom_reward_redemption.add", user_id, %{
-        "reward_id" => reward_id
-      }),
-      do:
-        ok(%{
-          "broadcaster_user_id" => user_id,
-          "reward_id" => reward_id
-        })
+  def construct("channel.channel_points_custom_reward_redemption.add", user_id, _values),
+    do: default(user_id)
 
-  def construct("channel.channel_points_custom_reward_redemption.update", user_id, %{
-        "reward_id" => reward_id
-      }),
-      do:
-        ok(%{
-          "broadcaster_user_id" => user_id,
-          "reward_id" => reward_id
-        })
+  def construct("channel.channel_points_custom_reward_redemption.update", user_id, _values),
+    do: default(user_id)
 
   def construct("channel.cheer", user_id, _values), do: default(user_id)
   def construct("channel.follow", user_id, _values), do: default(user_id)
@@ -67,13 +43,13 @@ defmodule EventSocket.Conditions do
   def construct("channel.prediction.lock", user_id, _values), do: default(user_id)
   def construct("channel.prediction.progress", user_id, _values), do: default(user_id)
 
-  def construct("channel.raid", user_id, _values = %{"mode" => "from"}),
+  def construct("channel.raid", user_id, _values = %{"direction" => "from"}),
     do:
       ok(%{
         "from_broadcaster_user_id" => user_id
       })
 
-  def construct("channel.raid", user_id, _values = %{"mode" => "to"}),
+  def construct("channel.raid", user_id, _values = %{"direction" => "to"}),
     do:
       ok(%{
         "to_broadcaster_user_id" => user_id
@@ -94,21 +70,26 @@ defmodule EventSocket.Conditions do
 
   def construct(_type, _user_id, _values), do: err("Invalid topic provided")
 
+  # Generic deconstruct
   def deconstruct(%{"broadcaster_user_id" => user_id}), do: {:ok, user_id, %{}}
+
+  ## Raid conditions
 
   def deconstruct(%{"from_broadcaster_user_id" => user_id}),
     do:
       {:ok, user_id,
        %{
-         "mode" => "from"
+         "direction" => "from"
        }}
 
   def deconstruct(%{"to_broadcaster_user_id" => user_id}),
     do:
       {:ok, user_id,
        %{
-         "mode" => "from"
+         "direction" => "to"
        }}
+
+  # Only allow global reward updates, so no deconstruct/1 for reward_id
 
   def deconstruct(_), do: {:error, :invalid_deconstruct_input}
 end
