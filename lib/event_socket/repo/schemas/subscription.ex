@@ -48,6 +48,5 @@ defmodule EventSocket.Repo.Schemas.Subscription do
     subscription
     |> Map.put(:hash, hash(subscription))
     |> cast(attrs, [:id, :status])
-    |> validate_required([])
   end
 end

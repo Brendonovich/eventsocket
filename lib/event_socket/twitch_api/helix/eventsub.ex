@@ -1,5 +1,5 @@
 defmodule EventSocket.TwitchAPI.Helix.EventSub do
-  alias EventSocket.{TwitchAPI.Helix, Secrets}
+  alias EventSocket.{TwitchAPI.Helix, Env}
 
   @spec create_subscription(String.t(), map()) :: any
   def create_subscription(type, condition) do
@@ -9,7 +9,7 @@ defmodule EventSocket.TwitchAPI.Helix.EventSub do
       "version" => 1,
       "transport" => %{
         "method" => "webhook",
-        "callback" => Secrets.webhook_callback(),
+        "callback" => Env.webhook_callback(),
         "secret" => "1234567890"
       }
     })

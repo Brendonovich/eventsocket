@@ -27,6 +27,14 @@ defmodule EventSocket.Repo.Mutations.Subscriptions do
     |> Repo.update()
   end
 
+  def set_status(id, status) do
+    %Subscription{
+      id: id
+    }
+    |> Subscription.edit_changeset(%{status: status})
+    |> Repo.update()
+  end
+
   @spec delete_by_id(String.t()) :: any
   def delete_by_id(id) do
     from(s in Subscription, where: s.id == ^id) |> Repo.delete_all()

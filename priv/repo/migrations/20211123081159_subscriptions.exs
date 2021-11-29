@@ -5,7 +5,6 @@ defmodule EventSocket.Repo.Migrations.Subscriptions do
     create table("users", primary_key: false) do
       add :id, :integer, primary_key: true
       add :display_name, :string
-      add :username, :string
       add :api_key_hash, :integer, null: true
     end
 
@@ -15,6 +14,12 @@ defmodule EventSocket.Repo.Migrations.Subscriptions do
       add :type, :string
       add :condition, :map
       add :hash, :integer, primary_key: true
+      add :user_id, references("users")
+    end
+
+    create table("sessions", primary_key: false) do
+      add :id, :uuid, primary_key: true, null: false
+      add :expires, :date
       add :user_id, references("users")
     end
   end

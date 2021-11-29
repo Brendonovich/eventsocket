@@ -1,7 +1,7 @@
 defmodule EventSocket.Repo.Subscriptions do
   alias EventSocket.Repo.{Mutations, Access}
 
-  defdelegate all_subscriptions, to: Access.Subscriptions
+  defdelegate all(user_id), to: Access.Subscriptions
   @spec exists?(String.t(), map) :: boolean
   defdelegate exists?(type, condition), to: Access.Subscriptions
 

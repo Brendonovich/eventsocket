@@ -3,22 +3,31 @@ defmodule EventSocketWeb.Plugs.Auth do
 
   import Plug.Conn
 
+  alias EventSocket.{Users, Sessions}
+
   def init(opts), do: opts
 
+  @spec call(Plug.Conn.t(), map) :: Plug.Conn.t()
   def call(conn, _params) do
     conn = conn |> fetch_session()
 
     cond do
-      (session_user_id = get_session(conn, "user_id")) != nil ->
-        nil
+      (session_id = conn.cookies["session"]) != nil ->
+        case Sessions.get(session_id) do
+          nil ->
+            conn |> send_resp(403, "Invalid session") |> halt
 
-      ([header_api_key] = get_req_header(conn, "authorization")) != nil ->
-        user = EventSocket.Users.by_api_key(header_api_key)
+          session ->
+            assign(conn, :user_id, session.user_id)
+        end
 
-        if user != nil do
-          assign(conn, :user_id, user.id)
-        else
-          conn |> send_resp(403, "Invalid API key provided") |> halt
+      (header_api_key = get_req_header(conn, "authorization") |> Enum.at(0)) != nil ->
+        case Users.by_api_key(header_api_key) do
+          nil ->
+            conn |> send_resp(403, "Invalid API key") |> halt
+
+          user ->
+            assign(conn, :user_id, user.id)
         end
 
       true ->

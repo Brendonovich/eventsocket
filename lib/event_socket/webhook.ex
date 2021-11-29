@@ -1,6 +1,5 @@
 defmodule EventSocket.Webhook do
-  @webhook_pending "webhook_callback_verification_pending"
-  @authorization_revoked "authorization_revoked"
+  alias EventSocket.{Env, Subscriptions}
 
   def signature_valid?(headers, raw_data) do
     signature_input =
@@ -9,7 +8,7 @@ defmodule EventSocket.Webhook do
         "#{raw_data}"
 
     encoded =
-      "#{:crypto.mac(:hmac, :sha256, EventSocket.Secrets.secret_key_base(), signature_input) |> Base.encode16()}"
+      "#{:crypto.mac(:hmac, :sha256, Env.secret_key_base(), signature_input) |> Base.encode16()}"
       |> String.downcase()
 
     "sha256=" <> signature = headers.signature |> String.downcase()
@@ -17,10 +16,15 @@ defmodule EventSocket.Webhook do
     signature == encoded
   end
 
-  def handle_event(%{"subscription" => %{"status" => @webhook_pending}, "challenge" => challenge}),
-    do: {:ok, challenge}
+  def handle_event(%{
+        "subscription" => %{"id" => id, "status" => "webhook_callback_verification_pending"},
+        "challenge" => challenge
+      }) do
+    Subscriptions.set_status(id, "enabled")
+    {:ok, challenge}
+  end
 
-  def handle_event(%{"subscription" => %{"status" => @authorization_revoked}}),
+  def handle_event(%{"subscription" => %{"status" => "authorization_revoked"}}),
     do: {:ok, "Authorization revoked"}
 
   def handle_event(%{"subscription" => subscription, "event" => event}) do

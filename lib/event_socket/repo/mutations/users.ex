@@ -7,7 +7,7 @@ defmodule EventSocket.Repo.Mutations.Users do
   def generate_api_key(user_id) do
     new_api_key = Ecto.UUID.generate()
 
-    changeset = %User{
+    %User{
       id: user_id
     }
     |> User.edit_changeset(%{
@@ -16,5 +16,11 @@ defmodule EventSocket.Repo.Mutations.Users do
     |> Repo.update()
 
     new_api_key
+  end
+
+  def create(data) do
+    %User{}
+    |> User.insert_changeset(data)
+    |> Repo.insert!()
   end
 end

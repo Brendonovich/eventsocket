@@ -14,7 +14,6 @@ alias EventSocket.Repo.Schemas
 
 EventSocket.Repo.insert!(%Schemas.User{
   display_name: "Brendonovich",
-  username: "brendonovich",
   id: 53_168_490,
   api_key_hash: :erlang.phash2("0")
 })

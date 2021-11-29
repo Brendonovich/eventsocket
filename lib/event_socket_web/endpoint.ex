@@ -7,7 +7,8 @@ defmodule EventSocketWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_event_socket_key",
-    signing_salt: "zjHpEeC1"
+    signing_salt: "zjHpEeC1",
+    same_site: "Lax"
   ]
 
   socket "/socket", EventSocketWeb.UserSocket,
@@ -52,5 +53,6 @@ defmodule EventSocketWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+  plug CORSPlug
   plug EventSocketWeb.Router
 end

@@ -5,7 +5,8 @@ defmodule EventSocket.Subscriptions do
     Conditions,
     Utilities,
     Repo.Subscriptions,
-    Repo.Schemas
+    Repo.Schemas,
+    Repo.Mutations
   }
 
   @spec create_subscription(String.t(), integer, map) ::
@@ -23,7 +24,7 @@ defmodule EventSocket.Subscriptions do
 
     # Create blank subscription in database
     case Subscriptions.create(subscription_data) do
-      {:ok, subscription} ->
+      {:ok, _} ->
         try do
           # Create EventSub subscription
           with {:ok, response} <- Helix.EventSub.create_subscription(type, twitch_condition),
@@ -69,4 +70,11 @@ defmodule EventSocket.Subscriptions do
 
     {:ok}
   end
+
+  @spec get_for_user(integer) :: [EventSocket.Repo.Schemas.Subscription.t()]
+  def get_for_user(user_id) do
+    Subscriptions.all(user_id)
+  end
+
+  defdelegate set_status(id, status), to: Mutations.Subscriptions
 end
