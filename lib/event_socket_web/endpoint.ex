@@ -1,12 +1,12 @@
 defmodule EventSocketWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :event_socket
+  use Phoenix.Endpoint, otp_app: :eventsocket
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
   @session_options [
     store: :cookie,
-    key: "_event_socket_key",
+    key: "_eventsocket_key",
     signing_salt: "zjHpEeC1",
     same_site: "Lax"
   ]
@@ -26,7 +26,7 @@ defmodule EventSocketWeb.Endpoint do
   # when deploying your static files in production.
   plug Plug.Static,
     at: "/",
-    from: :event_socket,
+    from: :eventsocket,
     gzip: false,
     only: ~w(css fonts images js favicon.ico robots.txt)
 
@@ -34,7 +34,7 @@ defmodule EventSocketWeb.Endpoint do
   # :code_reloader configuration of your endpoint.
   if code_reloading? do
     plug Phoenix.CodeReloader
-    plug Phoenix.Ecto.CheckRepoStatus, otp_app: :event_socket
+    plug Phoenix.Ecto.CheckRepoStatus, otp_app: :eventsocket
   end
 
   plug Phoenix.LiveDashboard.RequestLogger,

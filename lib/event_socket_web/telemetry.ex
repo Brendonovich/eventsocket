@@ -31,11 +31,11 @@ defmodule EventSocketWeb.Telemetry do
       ),
 
       # Database Metrics
-      summary("event_socket.repo.query.total_time", unit: {:native, :millisecond}),
-      summary("event_socket.repo.query.decode_time", unit: {:native, :millisecond}),
-      summary("event_socket.repo.query.query_time", unit: {:native, :millisecond}),
-      summary("event_socket.repo.query.queue_time", unit: {:native, :millisecond}),
-      summary("event_socket.repo.query.idle_time", unit: {:native, :millisecond}),
+      summary("eventsocket.repo.query.total_time", unit: {:native, :millisecond}),
+      summary("eventsocket.repo.query.decode_time", unit: {:native, :millisecond}),
+      summary("eventsocket.repo.query.query_time", unit: {:native, :millisecond}),
+      summary("eventsocket.repo.query.queue_time", unit: {:native, :millisecond}),
+      summary("eventsocket.repo.query.idle_time", unit: {:native, :millisecond}),
 
       # VM Metrics
       summary("vm.memory.total", unit: {:byte, :kilobyte}),

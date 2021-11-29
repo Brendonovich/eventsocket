@@ -1,0 +1,51 @@
+name: API CD
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - "web/**"
+
+env:
+  IMAGE_NAME: eventsocket-api:latest
+
+jobs:
+  deploy-prod:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    environment:
+      name: API Production
+      url: "https://api.eventsocket.brendonovich.dev"
+    steps:
+      - name: Pull
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: docker build . -t $IMAGE_NAME
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push to GHCR
+        id: push
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+          echo "::set-output name=image-digest::$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE_ID:$VERSION)"
+
+      - name: Deploy
+        run: ssh ssh://dokku@api.eventsocket.brendonovich.dev git:from-image ghrc.io/brendonovich/eventsocket-api:${{ steps.push.outputs.image-digest }}

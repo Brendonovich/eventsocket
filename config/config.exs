@@ -5,13 +5,13 @@
 # is restricted to this project.
 
 # General application configuration
-use Mix.Config
+import Config
 
-config :event_socket,
+config :eventsocket,
   ecto_repos: [EventSocket.Repo]
 
 # Configures the endpoint
-config :event_socket, EventSocketWeb.Endpoint,
+config :eventsocket, EventSocketWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "qq+EwdFJ9/KYjL3Rps72JOkzbFP2hhJDM2upwf/lh41OVVn2MtfHBt0UFFNn8AgA",
   render_errors: [view: EventSocketWeb.ErrorView, accepts: ~w(json), layout: false],

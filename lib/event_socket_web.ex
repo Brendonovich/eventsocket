@@ -30,7 +30,7 @@ defmodule EventSocketWeb do
   def view do
     quote do
       use Phoenix.View,
-        root: "lib/event_socket_web/templates",
+        root: "lib/eventsocket_web/templates",
         namespace: EventSocketWeb
 
       # Import convenience functions from controllers

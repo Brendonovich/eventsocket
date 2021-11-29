@@ -4,8 +4,8 @@ services:
   db:
     image: postgres:13
     environment:
-      - POSTGRES_DATABASE=event_socket
-      - POSTGRES_USER=event_socket
-      - POSTGRES_PASSWORD=event_socket
+      - POSTGRES_DATABASE=eventsocket
+      - POSTGRES_USER=eventsocket
+      - POSTGRES_PASSWORD=eventsocket
     ports:
       - "15432:5432"

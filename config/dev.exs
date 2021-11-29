@@ -1,10 +1,10 @@
-use Mix.Config
+import Config
 
 # Configure your database
-config :event_socket, EventSocket.Repo,
-  username: "event_socket",
-  password: "event_socket",
-  database: "event_socket",
+config :eventsocket, EventSocket.Repo,
+  username: "eventsocket",
+  password: "eventsocket",
+  database: "eventsocket",
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10,
@@ -16,7 +16,7 @@ config :event_socket, EventSocket.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
-config :event_socket, EventSocketWeb.Endpoint,
+config :eventsocket, EventSocketWeb.Endpoint,
   http: [port: 4000],
   debug_errors: true,
   code_reloader: true,
