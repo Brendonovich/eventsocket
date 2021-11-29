@@ -47,15 +47,24 @@ jobs:
           docker push $IMAGE_ID:$VERSION
           echo "::set-output name=image-digest::$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE_ID:$VERSION)"
 
-      - name: Deploy
+      - name: Setup SSH
         run: |
-          mkdir -p ~/.ssh/
-          echo "${{ secrets.DOKKU_SSH_KEY }}" > ~/.ssh/id_rsa
-          
-          ssh_port=$(parse-ssh-port)
-          ssh_host=$(parse-ssh-host)
+          echo "Setting up SSH Key"
 
-          log-info "Generating SSH_HOST_KEY from ssh-keyscan against $ssh_host:$ssh_port"
+          mkdir -p /root/.ssh
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' >/root/.ssh/id_rsa
+          chmod 600 /root/.ssh/id_rsa
+          chmod 700 /root/.ssh
+
+          ssh_port=22
+          ssh_host=${{ secrets.DOKKU_REMOTE_URL }}
+
+          echo "Generating SSH_HOST_KEY from ssh-keyscan against $ssh_host:$ssh_port"
           ssh-keyscan -H -p "$ssh_port" "$ssh_host" >>/root/.ssh/known_hosts
 
-          ssh ${{ secrets.DOKKU_SSH_ADDRESS }} git:from-image ${{ secrets.DOKKU_APP_NAME }} ghrc.io/brendonovich/eventsocket-api:latest
+          echo "Adding SSH Key to ssh-agent"
+          eval "$(ssh-agent -s)"
+          ssh-add /root/.ssh/id_rsa
+
+      - name: Deploy
+        run: ssh dokku@${{ secrets.DOKKU_REMOTE_URL }} git:from-image ${{ secrets.DOKKU_APP_NAME }} ghrc.io/brendonovich/eventsocket-api:latest
