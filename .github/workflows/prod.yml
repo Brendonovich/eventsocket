@@ -51,4 +51,11 @@ jobs:
         run: |
           mkdir -p ~/.ssh/
           echo "${{ secrets.DOKKU_SSH_KEY }}" > ~/.ssh/id_rsa
+          
+          ssh_port=$(parse-ssh-port)
+          ssh_host=$(parse-ssh-host)
+
+          log-info "Generating SSH_HOST_KEY from ssh-keyscan against $ssh_host:$ssh_port"
+          ssh-keyscan -H -p "$ssh_port" "$ssh_host" >>/root/.ssh/known_hosts
+
           ssh ${{ secrets.DOKKU_SSH_ADDRESS }} git:from-image ${{ secrets.DOKKU_APP_NAME }} ghrc.io/brendonovich/eventsocket-api:latest
