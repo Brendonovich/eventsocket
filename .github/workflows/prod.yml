@@ -67,4 +67,5 @@ jobs:
           ssh-add ~/.ssh/id_rsa
 
       - name: Deploy
-        run: ssh dokku@${{ secrets.DOKKU_REMOTE_URL }} git:from-image ${{ secrets.DOKKU_APP_NAME }} ghcr.io/brendonovich/eventsocket-api:latest
+        run: |
+          ssh dokku@${{ secrets.DOKKU_REMOTE_URL }} git:from-image ${{ secrets.DOKKU_APP_NAME }} {{ steps.push.outputs.image-digest }}
