@@ -48,4 +48,4 @@ jobs:
           echo "::set-output name=image-digest::$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE_ID:$VERSION)"
 
       - name: Deploy
-        run: ssh ssh://dokku@api.eventsocket.brendonovich.dev git:from-image ghrc.io/brendonovich/eventsocket-api:${{ steps.push.outputs.image-digest }}
+        run: ssh ${{ secrets.DOKKU_SSH_ADDRESS }} git:from-image ${{ secrets.DOKKU_APP_NAME }} ghrc.io/brendonovich/eventsocket-api:${{ steps.push.outputs.image-digest }}
