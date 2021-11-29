@@ -8,7 +8,7 @@ on:
       - "web/**"
 
 env:
-  IMAGE_NAME: eventsocket-api:latest
+  IMAGE_NAME: eventsocket-api
 
 jobs:
   deploy-prod:
