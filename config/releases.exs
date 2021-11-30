@@ -19,6 +19,10 @@ config :eventsocket,
   self_origin: System.fetch_env!("SELF_ORIGIN"),
   web_origin: System.fetch_env!("WEB_ORIGIN")
 
+config :cors_plug,
+  origin: [System.fetch_env!("WEB_ORIGIN")],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+
 # ## Using releases (Elixir v1.9+)
 #
 # If you are doing OTP releases, you need to instruct Phoenix
