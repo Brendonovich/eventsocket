@@ -10,7 +10,7 @@ defmodule EventSocket.TwitchAPI.Helix.EventSub do
       "transport" => %{
         "method" => "webhook",
         "callback" => Env.self_origin() <> "/eventsub/webhook",
-        "secret" => "1234567890"
+        "secret" => Env.secret_key_base()
       }
     })
   end
