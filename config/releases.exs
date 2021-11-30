@@ -2,7 +2,7 @@ import Config
 
 config :eventsocket, EventSocket.Repo,
   url: System.fetch_env!("DATABASE_URL"),
-  pool_size: String.to_integer(System.fetch_env!("POOL_SIZE") || "10")
+  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
 
 config :eventsocket, EventSocketWeb.Endpoint,
   http: [
