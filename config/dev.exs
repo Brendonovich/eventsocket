@@ -58,7 +58,6 @@ config :phoenix, :stacktrace_depth, 20
 config :phoenix, :plug_init_mode, :runtime
 
 config :cors_plug,
-  origin: ["http://localhost:3000"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+  origin: ["http://localhost:3000"]
 
 import_config "dev.secret.exs"

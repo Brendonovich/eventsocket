@@ -1,15 +1,15 @@
 import Config
 
 config :eventsocket, EventSocket.Repo,
-  url: System.get_env("DATABASE_URL"),
-  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+  url: System.fetch_env!("DATABASE_URL"),
+  pool_size: String.to_integer(System.fetch_env!("POOL_SIZE") || "10")
 
 config :eventsocket, EventSocketWeb.Endpoint,
   http: [
     port: String.to_integer(System.get_env("PORT") || "4000"),
     transport_options: [socket_opts: [:inet6]]
   ],
-  secret_key_base: System.get_env("SECRET_KEY_BASE")
+  secret_key_base: System.fetch_env!("SECRET_KEY_BASE")
 
 config :eventsocket, :twitch,
   client_id: System.fetch_env!("TWITCH_CLIENT_ID"),
@@ -18,10 +18,6 @@ config :eventsocket, :twitch,
 config :eventsocket,
   self_origin: System.fetch_env!("SELF_ORIGIN"),
   web_origin: System.fetch_env!("WEB_ORIGIN")
-
-config :cors_plug,
-  origin: [System.fetch_env!("WEB_ORIGIN")],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 
 # ## Using releases (Elixir v1.9+)
 #
