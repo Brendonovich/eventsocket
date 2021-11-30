@@ -12,6 +12,13 @@ defmodule EventSocketWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+  end
+
   pipeline :auth do
     plug EventSocketWeb.Plugs.Auth
   end
@@ -49,7 +56,9 @@ defmodule EventSocketWeb.Router do
       pipe_through :admin_auth
 
       delete("/subscriptions", AdminController, :delete_all_subscriptions)
-      live_dashboard "/dashboard"
+
+      pipe_through :browser
+      live_dashboard("/dashboard")
     end
   end
 end

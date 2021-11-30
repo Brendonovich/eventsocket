@@ -15,7 +15,8 @@ config :eventsocket, EventSocketWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "qq+EwdFJ9/KYjL3Rps72JOkzbFP2hhJDM2upwf/lh41OVVn2MtfHBt0UFFNn8AgA",
   render_errors: [view: EventSocketWeb.ErrorView, accepts: ~w(json), layout: false],
-  pubsub_server: EventSocket.PubSub
+  pubsub_server: EventSocket.PubSub,
+  live_view: [signing_salt: "FrxIfkQ6SsCc_RCB"]
 
 # Configures Elixir's Logger
 config :logger, :console,
