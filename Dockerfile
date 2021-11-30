@@ -67,10 +67,8 @@ FROM alpine:3.11.3
 
 ENV MIX_ENV=prod
 
-RUN apk update && \
-    apk add --no-cache \
-    bash \
-    openssl-dev
+RUN apk upgrade --no-cache && \
+    apk add --no-cache bash openssl libgcc libstdc++ ncurses-libs
 
 COPY --from=release-builder /opt/built /app
 WORKDIR /app
