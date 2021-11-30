@@ -55,7 +55,7 @@ defmodule EventSocketWeb.Endpoint do
   plug Plug.Session, @session_options
 
   plug CORSPlug,
-    origin: &EventSocket.Endpoint.cors_origin/0
+    origin: &EventSocketWeb.Endpoint.cors_origin/0
 
   plug EventSocketWeb.Router
 
