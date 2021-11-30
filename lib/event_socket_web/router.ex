@@ -1,6 +1,8 @@
 defmodule EventSocketWeb.Router do
   use EventSocketWeb, :router
 
+  import Phoenix.LiveDashboard.Router
+
   pipeline :api do
     plug Plug.Parsers,
       parsers: [:json],
@@ -47,6 +49,7 @@ defmodule EventSocketWeb.Router do
       pipe_through :admin_auth
 
       delete("/subscriptions", AdminController, :delete_all_subscriptions)
+      live_dashboard "/dashboard"
     end
   end
 end
