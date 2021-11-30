@@ -11,13 +11,10 @@ env:
   IMAGE_NAME: eventsocket-api
 
 jobs:
-  deploy-prod:
-    name: Build & Deploy
+  build-prod:
+    name: Build to GHCR
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
-    environment:
-      name: API Production
-      url: "https://api.eventsocket.brendonovich.dev"
     steps:
       - name: Pull
         uses: actions/checkout@v2
@@ -47,6 +44,15 @@ jobs:
           docker push $IMAGE_ID:$VERSION
           echo "::set-output name=image-digest::$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE_ID:$VERSION)"
 
+  deploy-prod:
+    name: Deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    environment:
+      name: API Production
+      url: "https://api.eventsocket.brendonovich.dev"
+    needs: [build-prod]
+    steps:
       - name: Setup SSH
         run: |
           echo "Setting up SSH Key"
