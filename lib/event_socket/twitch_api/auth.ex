@@ -39,7 +39,7 @@ defmodule EventSocket.TwitchAPI.Auth do
   def login_redirect_url do
     "https://id.twitch.tv/oauth2/authorize" <>
       "?client_id=#{Env.twitch_client_id()}" <>
-      "&redirect_uri=#{Env.twitch_redirect_uri()}" <>
+      "&redirect_uri=#{Env.web_origin()}/auth/callback" <>
       "&response_type=code" <> "&scope=#{Enum.join(Constants.twitch_auth_scopes(), " ")}"
   end
 
@@ -53,7 +53,7 @@ defmodule EventSocket.TwitchAPI.Auth do
           client_id: Env.twitch_client_id(),
           client_secret: Env.twitch_client_secret(),
           grant_type: "authorization_code",
-          redirect_uri: Env.twitch_redirect_uri(),
+          redirect_uri: Env.web_origin() <> "/auth/callback",
           code: code
         }
       )

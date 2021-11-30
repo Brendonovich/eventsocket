@@ -13,13 +13,11 @@ config :eventsocket, EventSocketWeb.Endpoint,
 
 config :eventsocket, :twitch,
   client_id: System.fetch_env!("TWITCH_CLIENT_ID"),
-  client_secret: System.fetch_env!("TWITCH_CLIENT_SECRET"),
-  redirect_uri: System.fetch_env!("TWITCH_REDIRECT_URI")
-
-origin_url = System.fetch_env!("ORIGIN_URL")
+  client_secret: System.fetch_env!("TWITCH_CLIENT_SECRET")
 
 config :eventsocket,
-  webhook_callback: origin_url <> "/webhook"
+  self_origin: System.fetch_env!("SELF_ORIGIN"),
+  web_origin: System.fetch_env!("WEB_ORIGIN")
 
 # ## Using releases (Elixir v1.9+)
 #
