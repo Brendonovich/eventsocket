@@ -74,5 +74,5 @@ jobs:
 
       - name: Deploy
         run: |
-          ssh actions@${{ secrets.DOKKU_REMOTE_URL }} docker pull ghcr.io/brendonovich/eventsocket-api:latest
+          ssh root@${{ secrets.DOKKU_REMOTE_URL }} docker pull ghcr.io/brendonovich/eventsocket-api:latest
           ssh dokku@${{ secrets.DOKKU_REMOTE_URL }} git:from-image ${{ secrets.DOKKU_APP_NAME }} ghcr.io/brendonovich/eventsocket-api:latest
