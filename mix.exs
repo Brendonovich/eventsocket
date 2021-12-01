@@ -47,7 +47,8 @@ defmodule EventSocket.MixProject do
       {:httpoison, "~> 1.8"},
       {:cors_plug, "~> 2.0"},
       {:joken, "~> 2.0-rc0"},
-      {:absinthe, "~> 1.5"}
+      {:absinthe, "~> 1.5"},
+      {:libcluster, "~> 2.1"}
     ]
   end
 
