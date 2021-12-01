@@ -24,6 +24,11 @@ defmodule EventSocket.TwitchAPI.Credentials do
   end
 
   @impl true
+  def terminate(reason, _state) do
+   :ok
+  end
+
+  @impl true
   def handle_call(:get_app_access_token, _from, state) do
     {:reply, state.app_access_token, state}
   end
@@ -34,5 +39,7 @@ defmodule EventSocket.TwitchAPI.Credentials do
   end
 
   def get_app_access_token, do: GenServer.call(TwitchAPI.Credentials, :get_app_access_token)
-  def get_jwt_public_key, do: GenServer.call(TwitchAPI.Credentials, :get_jwt_public_key) |> JOSE.JWK.from_map()
+
+  def get_jwt_public_key,
+    do: GenServer.call(TwitchAPI.Credentials, :get_jwt_public_key) |> JOSE.JWK.from_map()
 end

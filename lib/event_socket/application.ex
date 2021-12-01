@@ -17,9 +17,9 @@ defmodule EventSocket.Application do
       {Phoenix.PubSub, name: EventSocket.PubSub},
       # Start the Endpoint (http/https)
       EventSocketWeb.Endpoint,
-      TwitchAPI.Credentials
-      # Start a worker by calling: EventSocket.Worker.start_link(arg)
-      # {EventSocket.Worker, arg}
+      TwitchAPI.Credentials,
+      {Plug.Cowboy.Drainer, refs: :all, shutdown: 10000},
+      EventSocketWeb.Socket.Registry
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

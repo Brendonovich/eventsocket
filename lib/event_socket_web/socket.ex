@@ -1,5 +1,7 @@
-defmodule EventSocketWeb.UserSocket do
+defmodule EventSocketWeb.Socket do
   @behaviour Phoenix.Socket.Transport
+
+  alias EventSocketWeb.Socket.Registry
 
   @impl true
   def child_spec(_opts) do
@@ -30,19 +32,39 @@ defmodule EventSocketWeb.UserSocket do
   @impl true
   @spec init(State.t()) :: {:ok, State.t()}
   def init(state) do
+    Registry.register()
     EventSocket.PubSub.subscribe("user_events:#{state.id}")
+
     {:ok, state}
   end
 
   @impl true
   def handle_info({:eventsub_event, data}, state) do
     {:push,
-     {:text,
-      Jason.encode_to_iodata!(%{
-        type: data.type,
-        event: data.event,
-        condition: data.condition
-      })}, state}
+     resp(%{
+       type: "notification",
+       payload: %{
+         event: data.type,
+         payload: data.event,
+         condition: data.condition
+       }
+     }), state}
+  end
+
+  @impl true
+  def handle_info(:notify_shutdown, state) do
+    {:push,
+     resp(%{
+       type: "websocket_reconnect"
+     }), state}
+  end
+
+  defp resp(data) when is_map(data) do
+    {:text, Jason.encode_to_iodata!(data)}
+  end
+
+  def notify_shutdown(pid) do
+    send(pid, :notify_shutdown)
   end
 
   @impl true

@@ -11,7 +11,7 @@ defmodule EventSocketWeb.Endpoint do
     same_site: "Lax"
   ]
 
-  socket "/socket", EventSocketWeb.UserSocket,
+  socket "/socket", EventSocketWeb.Socket,
     websocket: [
       # TODO: Implement ping/pong so this isn't necessary
       timeout: :infinity
@@ -61,5 +61,10 @@ defmodule EventSocketWeb.Endpoint do
 
   def cors_origin do
     [EventSocket.Env.web_origin()]
+  end
+
+  def handle_info(msg, state) do
+    IO.inspect(msg)
+    {:ok, state}
   end
 end
