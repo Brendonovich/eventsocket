@@ -29,8 +29,10 @@ config :phoenix, :json_library, Jason
 config :libcluster,
   topologies: [
     gossip: [
-      strategy: Elixir.Cluster.Strategy.Gossip,
-      config: []
+      strategy: EventSocket.Cluster.Strategy.Gossip,
+      config: [
+        secret: "gossip_secret"
+      ]
     ]
   ]
 
