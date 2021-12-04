@@ -41,7 +41,7 @@ defmodule EventSocket.Subscriptions do
                      status: data["status"]
                    }
                  ) do
-            PubSub.broadcast(
+            PubSub.broadcast!(
               "eventsub_subscriptions",
               {:new_eventsub_subscription, subscription}
             )

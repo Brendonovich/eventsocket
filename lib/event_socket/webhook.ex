@@ -1,5 +1,5 @@
 defmodule EventSocket.Webhook do
-  alias EventSocket.{Env, Subscriptions}
+  alias EventSocket.{Env, Subscriptions, Webhook.Event, PubSub, PubSub.Events}
 
   def signature_valid?(headers, raw_data) do
     signature_input =
@@ -16,28 +16,37 @@ defmodule EventSocket.Webhook do
     signature == encoded
   end
 
-  def handle_event(%{
-        "subscription" => %{"id" => id, "status" => "webhook_callback_verification_pending"},
-        "challenge" => challenge
-      }) do
+  def process_event(event = %Event{}), do: handle_event(event.headers.type, event)
+
+  defp handle_event(:webhook_callback_verification, %Event{
+         body: %{
+           :challenge => challenge,
+           :subscription => %{
+             "id" => id
+           }
+         }
+       }) do
     Subscriptions.set_status(id, "enabled")
     {:ok, challenge}
   end
 
-  def handle_event(%{"subscription" => %{"status" => "authorization_revoked"}}),
-    do: {:ok, "Authorization revoked"}
-
-  def handle_event(%{"subscription" => subscription, "event" => event}) do
-    case EventSocket.Conditions.deconstruct(subscription["condition"]) do
+  defp handle_event(
+         :notification,
+         %Event{
+           headers: %Event.Headers{:id => id},
+           body: body
+         }
+       ) do
+    case EventSocket.Conditions.deconstruct(body["subscription"]["condition"]) do
       {:ok, user_id, condition} ->
-        EventSocket.PubSub.broadcast(
-          "user_events:#{user_id}",
-          {:eventsub_event,
-           %{
-             type: subscription["type"],
-             event: event,
-             condition: condition
-           }}
+        PubSub.broadcast_user_event!(
+          user_id,
+          %Events.User.EventsubNotification{
+            type: body["subscription"]["type"],
+            event: body["event"],
+            condition: condition,
+            id: id
+          }
         )
 
       {:error, _} ->
@@ -47,4 +56,7 @@ defmodule EventSocket.Webhook do
 
     {:ok, ""}
   end
+
+  defp handle_event(:revocation, _event),
+    do: {:ok, "Authorization revoked"}
 end

@@ -24,7 +24,7 @@ defmodule EventSocket.TwitchAPI.Credentials do
   end
 
   @impl true
-  def terminate(reason, _state) do
+  def terminate(_reason, _state) do
    :ok
   end
 

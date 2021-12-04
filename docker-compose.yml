@@ -9,3 +9,13 @@ services:
       - POSTGRES_PASSWORD=eventsocket
     ports:
       - "15432:5432"
+  api:
+    build: _infra/dev
+    volumes:
+      - .:/srv:rw
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+    working_dir: /srv
+    command: mix phx.server

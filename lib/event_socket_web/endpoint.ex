@@ -62,9 +62,4 @@ defmodule EventSocketWeb.Endpoint do
   def cors_origin do
     [EventSocket.Env.web_origin()]
   end
-
-  def handle_info(msg, state) do
-    IO.inspect(msg)
-    {:ok, state}
-  end
 end

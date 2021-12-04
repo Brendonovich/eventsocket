@@ -5,10 +5,10 @@ config :eventsocket, EventSocket.Repo,
   username: "eventsocket",
   password: "eventsocket",
   database: "eventsocket",
-  hostname: "localhost",
+  hostname: "db",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10,
-  port: 15432
+  port: 5432
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

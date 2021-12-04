@@ -28,3 +28,4 @@ eventsocket-*.tar
 /priv/static/
 
 .env*
+.DS_Store

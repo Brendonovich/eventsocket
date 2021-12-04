@@ -2,6 +2,7 @@ defmodule EventSocketWeb.Socket do
   @behaviour Phoenix.Socket.Transport
 
   alias EventSocketWeb.Socket.Registry
+  alias EventSocket.PubSub.Events
 
   @impl true
   def child_spec(_opts) do
@@ -10,9 +11,30 @@ defmodule EventSocketWeb.Socket do
 
   defmodule State do
     @type t :: %__MODULE__{
-            id: integer
+            id: integer,
+            ping_timer: any
           }
-    defstruct id: 0
+    defstruct id: 0, ping_timer: nil
+  end
+
+  defmodule Reply do
+    @derive Jason.Encoder
+    defstruct metadata: %{}, payload: %{}
+
+    def encoded(type, payload \\ %{}, metadata \\ %{}) do
+      {:text,
+       Jason.encode_to_iodata!(%Reply{
+         metadata:
+           Map.merge(
+             %{message_id: Ecto.UUID.generate()},
+             Map.merge(metadata, %{
+               message_type: type,
+               message_timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+             })
+           ),
+         payload: payload
+       })}
+    end
   end
 
   @impl true
@@ -33,34 +55,43 @@ defmodule EventSocketWeb.Socket do
   @spec init(State.t()) :: {:ok, State.t()}
   def init(state) do
     Registry.register()
-    EventSocket.PubSub.subscribe("user_events:#{state.id}")
+    EventSocket.PubSub.subscribe_user_events(state.id)
 
-    {:ok, state}
+    {:ok, state |> queue_ping}
+  end
+
+  def queue_ping(%State{} = state) do
+    if !is_nil(state.ping_timer), do: Process.cancel_timer(state.ping_timer)
+
+    %{state | ping_timer: Process.send_after(self(), :ping, 15000)}
   end
 
   @impl true
-  def handle_info({:eventsub_event, data}, state) do
-    {:push,
-     resp(%{
-       type: "notification",
-       payload: %{
-         event: data.type,
-         payload: data.event,
-         condition: data.condition
-       }
-     }), state}
+  def handle_info(data, state) do
+    {:push, handle_event(data), state |> queue_ping}
   end
 
-  @impl true
-  def handle_info(:notify_shutdown, state) do
-    {:push,
-     resp(%{
-       type: "websocket_reconnect"
-     }), state}
+  def handle_event(%Events.User.EventsubNotification{} = data) do
+    Reply.encoded(
+      "notification",
+      %{
+        event: data.type,
+        payload: data.event,
+        condition: data.condition
+      },
+      %{
+        message_id: data.id,
+        subscription_type: data.type
+      }
+    )
   end
 
-  defp resp(data) when is_map(data) do
-    {:text, Jason.encode_to_iodata!(data)}
+  def handle_event(:notify_shutdown) do
+    Reply.encoded("websocket_reconnect")
+  end
+
+  def handle_event(:ping) do
+    Reply.encoded("websocket_keepalive")
   end
 
   def notify_shutdown(pid) do
@@ -69,7 +100,7 @@ defmodule EventSocketWeb.Socket do
 
   @impl true
   def handle_in(_in, state) do
-    {:ok, state}
+    {:stop, :exit, state}
   end
 
   @impl true

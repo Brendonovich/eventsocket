@@ -22,7 +22,6 @@ defmodule EventSocketWeb.EventSubController do
   def delete_subscription(%Plug.Conn{} = conn, _data) do
     case conn.query_params["id"] do
       nil ->
-        IO.inspect(conn)
         resp(conn, 400, "Missing id")
 
       id ->

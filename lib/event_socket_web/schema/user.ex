@@ -1,7 +1,7 @@
 defmodule EventSocketWeb.Schema.User do
   use Absinthe.Schema.Notation
 
-  alias EventSocket.Resolvers
+  alias EventSocketWeb.Resolvers
 
   object :user do
     field :id, :id
