@@ -77,6 +77,7 @@ jobs:
         with:
           host: ${{ secrets.DOKKU_REMOTE_URL }}
           username: root
+          key: ${{ secrets.DOKKU_SSH_KEY }}
           script: |
             docker pull ghcr.io/brendonovich/eventsocket-api:latest
             dokku git:from-image ${{ secrets.DOKKU_APP_NAME }} ghcr.io/brendonovich/eventsocket-api:latest
@@ -87,6 +88,7 @@ jobs:
         with:
           host: ${{ secrets.DOKKU_REMOTE_URL }}
           username: root
+          key: ${{ secrets.DOKKU_SSH_KEY }}
           script: |
             dokku enter ${{ secrets.DOKKU_APP_NAME }}
             ./eventsocket/bin/eventsocket eval "EventSocket.Release.migrate"
