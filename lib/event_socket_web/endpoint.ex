@@ -13,10 +13,9 @@ defmodule EventSocketWeb.Endpoint do
 
   socket "/socket", EventSocketWeb.Socket,
     websocket: [
-      # TODO: Implement ping/pong so this isn't necessary
+      path: "/",
       timeout: :infinity
-    ],
-    longpoll: false
+    ]
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 

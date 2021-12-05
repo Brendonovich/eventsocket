@@ -1,4 +1,4 @@
-defmodule EventSocketWeb.Socket.Registry do
+defmodule EventSocketWeb.Socket.TerminationRegistry do
   use GenServer
 
   alias EventSocketWeb.Socket
@@ -11,14 +11,14 @@ defmodule EventSocketWeb.Socket.Registry do
 
   def start_link(_) do
     GenServer.start_link(
-      EventSocketWeb.Socket.Registry,
+      __MODULE__,
       MapSet.new(),
-      name: EventSocketWeb.Socket.Registry
+      name: __MODULE__
     )
   end
 
   def register() do
-    GenServer.call(EventSocketWeb.Socket.Registry, {:register, self()})
+    GenServer.call(__MODULE__, {:register, self()})
   end
 
   @impl true

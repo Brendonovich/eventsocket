@@ -18,38 +18,26 @@ defmodule EventSocket.Webhook do
 
   def process_event(event = %Event{}), do: handle_event(event.headers.type, event)
 
-  defp handle_event(:webhook_callback_verification, %Event{
-         body: %{
-           :challenge => challenge,
-           :subscription => %{
-             "id" => id
-           }
-         }
-       }) do
-    Subscriptions.set_status(id, "enabled")
-    {:ok, challenge}
+  defp handle_event(:webhook_callback_verification, %Event{} = event) do
+    Subscriptions.set_status(event.body["subscription"]["id"], "enabled")
+    {:ok, event.body["challenge"]}
   end
 
-  defp handle_event(
-         :notification,
-         %Event{
-           headers: %Event.Headers{:id => id},
-           body: body
-         }
-       ) do
-    case EventSocket.Conditions.deconstruct(body["subscription"]["condition"]) do
+  defp handle_event(:notification, %Event{} = event) do
+    case EventSocket.Conditions.deconstruct(event.body["subscription"]["condition"]) do
       {:ok, user_id, condition} ->
         PubSub.broadcast_user_event!(
           user_id,
           %Events.User.EventsubNotification{
-            type: body["subscription"]["type"],
-            event: body["event"],
+            type: event.body["subscription"]["type"],
+            event: event.body["event"],
             condition: condition,
-            id: id
+            id: event.headers.id
           }
         )
 
       {:error, _} ->
+        IO.inspect("Failed to deconstruct condition", event.body["subscription"]["condition"])
         # TODO: Handle error
         nil
     end

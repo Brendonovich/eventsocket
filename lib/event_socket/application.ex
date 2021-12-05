@@ -19,8 +19,9 @@ defmodule EventSocket.Application do
       EventSocketWeb.Endpoint,
       TwitchAPI.Credentials,
       {Plug.Cowboy.Drainer, refs: :all, shutdown: 10000},
-      EventSocketWeb.Socket.Registry,
-      {Cluster.Supervisor, [Application.get_env(:libcluster, :topologies), [name: EventSocket.ClusterSupervisor]]}
+      EventSocketWeb.Socket.TerminationRegistry,
+      {Cluster.Supervisor,
+       [Application.get_env(:libcluster, :topologies), [name: EventSocket.ClusterSupervisor]]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -1,5 +1,5 @@
 defmodule EventSocket.Users do
-  alias EventSocket.Repo.Users
+  alias EventSocket.Repo.{Users}
   alias EventSocket.Repo.Schemas.User
 
   @spec by_api_key(String.t()) :: nil | User.t()

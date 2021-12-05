@@ -1,7 +1,7 @@
 defmodule EventSocketWeb.Socket do
   @behaviour Phoenix.Socket.Transport
 
-  alias EventSocketWeb.Socket.Registry
+  alias EventSocketWeb.Socket.TerminationRegistry
   alias EventSocket.PubSub.Events
 
   @impl true
@@ -11,51 +11,62 @@ defmodule EventSocketWeb.Socket do
 
   defmodule State do
     @type t :: %__MODULE__{
-            id: integer,
+            id: Ecto.UUID.t(),
+            user_id: integer,
             ping_timer: any
           }
-    defstruct id: 0, ping_timer: nil
+    defstruct id: "", ping_timer: nil, user_id: 0
   end
 
   defmodule Reply do
     @derive Jason.Encoder
     defstruct metadata: %{}, payload: %{}
 
-    def encoded(type, payload \\ %{}, metadata \\ %{}) do
-      {:text,
-       Jason.encode_to_iodata!(%Reply{
-         metadata:
-           Map.merge(
-             %{message_id: Ecto.UUID.generate()},
-             Map.merge(metadata, %{
-               message_type: type,
-               message_timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
-             })
-           ),
-         payload: payload
-       })}
+    def new(type, payload \\ %{}, metadata \\ %{}) do
+      %Reply{
+        metadata:
+          Map.merge(
+            metadata,
+            %{
+              message_id: Map.get(metadata, :message_id, Ecto.UUID.generate()),
+              message_type: type,
+              message_timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+            }
+          ),
+        payload: payload
+      }
+    end
+
+    def encode(reply) do
+      {:text, Jason.encode_to_iodata!(reply)}
     end
   end
 
   @impl true
-  def connect(%{params: %{"api_key" => api_key}}) do
-    case EventSocket.Users.by_api_key(api_key) do
-      nil ->
-        {:error, "Invalid API key"}
+  def connect(%{params: %{"api_key" => api_key}}),
+    do: connect_impl(EventSocket.Users.by_api_key(api_key))
 
-      user ->
+  def connect_impl(nil), do: {:error, "Invalid API key"}
+
+  def connect_impl(user) do
+    case EventSocket.Sockets.register(user.id) do
+      {:ok, socket} ->
         {:ok,
          %State{
-           id: user.id
+           id: socket.id,
+           user_id: user.id
          }}
+
+      {:error, _} ->
+        :error
     end
   end
 
   @impl true
   @spec init(State.t()) :: {:ok, State.t()}
   def init(state) do
-    Registry.register()
-    EventSocket.PubSub.subscribe_user_events(state.id)
+    TerminationRegistry.register()
+    EventSocket.PubSub.subscribe_user_events(state.user_id)
 
     {:ok, state |> queue_ping}
   end
@@ -67,32 +78,31 @@ defmodule EventSocketWeb.Socket do
   end
 
   @impl true
-  def handle_info(data, state) do
-    {:push, handle_event(data), state |> queue_ping}
-  end
+  def handle_info(data, state),
+    do: {
+      :push,
+      data |> handle_event |> Reply.encode(),
+      state |> queue_ping
+    }
 
   def handle_event(%Events.User.EventsubNotification{} = data) do
-    Reply.encoded(
+    Reply.new(
       "notification",
       %{
-        event: data.type,
-        payload: data.event,
-        condition: data.condition
+        subscription: %{
+          condition: data.condition,
+          type: data.type
+        },
+        event: data.event
       },
       %{
-        message_id: data.id,
         subscription_type: data.type
       }
     )
   end
 
-  def handle_event(:notify_shutdown) do
-    Reply.encoded("websocket_reconnect")
-  end
-
-  def handle_event(:ping) do
-    Reply.encoded("websocket_keepalive")
-  end
+  def handle_event(:notify_shutdown), do: Reply.new("websocket_reconnect")
+  def handle_event(:ping), do: Reply.new("websocket_keepalive")
 
   def notify_shutdown(pid) do
     send(pid, :notify_shutdown)
@@ -104,7 +114,8 @@ defmodule EventSocketWeb.Socket do
   end
 
   @impl true
-  def terminate(_reason, _state) do
+  def terminate(_reason, state) do
+    EventSocket.Sockets.delete!(state.id)
     :ok
   end
 end

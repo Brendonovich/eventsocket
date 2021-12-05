@@ -13,4 +13,12 @@ defmodule EventSocket.Repo.Access.Users do
   def by_id(id) do
     Repo.get_by(User, id: id)
   end
+
+  def get_and_lock(id) do
+    from(u in User,
+      where: u.id == ^id,
+      lock: "FOR UPDATE"
+    )
+    |> Repo.one()
+  end
 end

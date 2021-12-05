@@ -73,7 +73,20 @@ jobs:
           ssh-add ~/.ssh/id_rsa
 
       - name: Deploy
-        run: |
-          ssh root@${{ secrets.DOKKU_REMOTE_URL }} docker pull ghcr.io/brendonovich/eventsocket-api:latest
-          ssh dokku@${{ secrets.DOKKU_REMOTE_URL }} git:from-image ${{ secrets.DOKKU_APP_NAME }} ghcr.io/brendonovich/eventsocket-api:latest
-          ssh dokku@${{ secrets.DOKKU_REMOTE_URL }} ps:rebuild ${{ secrets.DOKKU_APP_NAME }}
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DOKKU_REMOTE_URL }}
+          username: root
+          script: |
+            docker pull ghcr.io/brendonovich/eventsocket-api:latest
+            dokku git:from-image ${{ secrets.DOKKU_APP_NAME }} ghcr.io/brendonovich/eventsocket-api:latest
+            dokku ps:rebuild ${{ secrets.DOKKU_APP_NAME }}
+
+      - name: Run DB Migrations
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DOKKU_REMOTE_URL }}
+          username: root
+          script: |
+            dokku enter ${{ secrets.DOKKU_APP_NAME }}
+            ./eventsocket/bin/eventsocket eval "EventSocket.Release.migrate"

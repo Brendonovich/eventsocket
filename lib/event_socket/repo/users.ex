@@ -12,4 +12,6 @@ defmodule EventSocket.Repo.Users do
   defdelegate generate_api_key(user_id), to: Mutations.Users
 
   defdelegate create(data), to: Mutations.Users
+
+  defdelegate get_and_lock(id), to: Access.Users
 end
