@@ -70,6 +70,7 @@ RUN apk upgrade --no-cache && \
     apk add --no-cache bash openssl libgcc libstdc++ ncurses-libs
 
 COPY --from=release-builder /opt/built /app
+COPY Procfile /app
 WORKDIR /app
 
 EXPOSE 4000

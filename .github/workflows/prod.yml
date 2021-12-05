@@ -78,6 +78,6 @@ jobs:
           ssh dokku@${{ secrets.DOKKU_REMOTE_URL }} git:from-image ${{ secrets.DOKKU_APP_NAME }} ghcr.io/brendonovich/eventsocket-api:latest
           ssh dokku@${{ secrets.DOKKU_REMOTE_URL }} ps:rebuild ${{ secrets.DOKKU_APP_NAME }}
 
-      - name: Run DB Migrations
-        run: |
-          ssh dokku@${{ secrets.DOKKU_REMOTE_URL }} run ${{ secrets.DOKKU_APP_NAME }} './eventsocket/bin/eventsocket eval "EventSocket.Release.migrate"'
+      # - name: Run DB Migrations
+      #   run: |
+      #     ssh dokku@${{ secrets.DOKKU_REMOTE_URL }} run ${{ secrets.DOKKU_APP_NAME }} './eventsocket/bin/eventsocket eval "EventSocket.Release.migrate"'
