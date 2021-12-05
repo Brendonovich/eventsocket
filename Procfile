@@ -1,1 +1,1 @@
-release: /eventsocket/bin/eventsocket eval "EventSocket.Release.migrate"
+release: ./eventsocket/bin/eventsocket eval "EventSocket.Release.migrate"
