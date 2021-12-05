@@ -5,23 +5,45 @@ defmodule EventSocket.Application do
 
   use Application
 
-  alias EventSocket.TwitchAPI
+  alias EventSocket.{TwitchAPI, UserServer}
 
   def start(_type, _args) do
     children = [
-      # Start the Ecto repository
-      EventSocket.Repo,
-      # Start the Telemetry supervisor
-      # EventSocketWeb.Telemetry,
-      # Start the PubSub system
-      {Phoenix.PubSub, name: EventSocket.PubSub},
-      # Start the Endpoint (http/https)
-      EventSocketWeb.Endpoint,
-      TwitchAPI.Credentials,
-      {Plug.Cowboy.Drainer, refs: :all, shutdown: 10000},
-      EventSocketWeb.Socket.TerminationRegistry,
+      # Autoclustering
       {Cluster.Supervisor,
-       [Application.get_env(:libcluster, :topologies), [name: EventSocket.ClusterSupervisor]]}
+       [Application.get_env(:libcluster, :topologies), [name: EventSocket.ClusterSupervisor]]},
+
+      # Database
+      EventSocket.Repo,
+
+      # PubSub
+      {Phoenix.PubSub, name: EventSocket.PubSub},
+
+      # UserServer stack
+      # Children are shut down in reverse order of creation
+      # Putting UserServer stuff up top allows it to outlive sockets,
+      # so that by the time the UserServer is shut down, all sockets
+      # that need to unregister themselves have been closed
+      UserServer.Registry,
+      UserServer.Supervisor,
+      UserServer.NodeListener,
+
+      # Exit signal flows from TerminationRegistry -> Drainer -> Endpoint
+      # TerminationRegistry notifies all sockets of impending shutdown & updates state accordingly
+      # Drainer waits a grace period for sockets to be closed by clients
+      # Endpoint forces all sockets to close
+
+      # HTTP endpoint
+      EventSocketWeb.Endpoint,
+
+      # Twitch credential manager
+      TwitchAPI.Credentials,
+
+      # Socket drainer
+      {Plug.Cowboy.Drainer, refs: :all, shutdown: 10000},
+
+      # Socket termination handler
+      EventSocketWeb.Socket.TerminationRegistry
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

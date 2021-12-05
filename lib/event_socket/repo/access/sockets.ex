@@ -4,6 +4,7 @@ defmodule EventSocket.Repo.Access.Sockets do
   alias EventSocket.Repo.Schemas.Socket
   alias EventSocket.Repo
 
+  @spec get_by_user(integer()) :: list(Socket.t())
   def get_by_user(user_id) do
     from(s in Socket,
       where:

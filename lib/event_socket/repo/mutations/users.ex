@@ -18,6 +18,7 @@ defmodule EventSocket.Repo.Mutations.Users do
     new_api_key
   end
 
+  @spec create(map) :: User.t()
   def create(data) do
     %User{}
     |> User.insert_changeset(data)

@@ -13,13 +13,6 @@ RUN apk update && \
     mix local.rebar --force 
 
 ENV MIX_ENV=prod
-RUN mkdir \ 
-    /app/_build/ \
-    /app/config/ \
-    /app/lib/ \
-    /app/priv/ \ 
-    /app/deps/ \
-    /app/rel/
 
 # install deps and compile deps
 COPY mix.exs /app/mix.exs
@@ -28,7 +21,7 @@ RUN mix do deps.get --only $MIX_ENV, deps.compile
 RUN mix compile
 
 ################################################################################
-# STEP 3 - RELEASE BUILDER
+# STEP 2 - RELEASE BUILDER
 FROM elixir:1.12-alpine  AS release-builder
 
 ENV MIX_ENV=prod
@@ -61,7 +54,7 @@ RUN mkdir -p /opt/built &&\
     cp -r _build/prod/rel/eventsocket /opt/built
 
 ################################################################################
-## STEP 4 - FINAL
+## STEP 3 - FINAL
 FROM alpine:3.11.3
 
 ENV MIX_ENV=prod
