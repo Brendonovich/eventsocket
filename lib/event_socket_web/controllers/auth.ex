@@ -37,7 +37,13 @@ defmodule EventSocketWeb.AuthController do
 
     conn
     |> put_resp_cookie("session", session, @session_cookie_options)
-    |> send_resp(200, "")
+    |> send_resp(
+      200,
+      Jason.encode_to_iodata!(%{
+        id: user.id,
+        display_name: user.display_name
+      })
+    )
   end
 
   def me(%Plug.Conn{} = conn, _body) do

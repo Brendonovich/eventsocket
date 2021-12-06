@@ -79,7 +79,7 @@ const Subscriptions = () => {
   return (
     <div className="overflow-y-hidden flex-1">
       <div className="py-2 overflow-y-auto h-full px-2">
-        <div className="flex flex-col space-y-2 w-full max-w-2xl mx-auto">
+        <div className="flex flex-col space-y-2 w-full max-w-3xl mx-auto">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}

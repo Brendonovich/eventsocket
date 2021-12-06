@@ -18,11 +18,11 @@ function App() {
     { enabled: !isUnauthedRoute }
   );
 
-  if (isUnauthedRoute) return <Outlet />;
-
   return (
-    <div className="bg-gray-800 w-screen h-screen text-white flex flex-col">
-      {isLoading ? null : (
+    <div className="bg-black w-screen h-screen text-white flex flex-col">
+      {isUnauthedRoute ? (
+        <Outlet />
+      ) : isLoading ? null : (
         <>
           <Navbar />
           <Outlet />

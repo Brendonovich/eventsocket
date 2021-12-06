@@ -27,11 +27,11 @@ const NavbarItem = (props: { to: string; children: ReactNode }) => {
   return (
     <div
       className={clsx(
-        "font-medium border-b border-transparent px-2 py-3",
+        "font-medium border-b-2 border-transparent py-4 transition-colors",
         match && "border-white"
       )}
     >
-      <Link {...props} />
+      <Link className="bg-opacity-40 p-2 rounded-md" {...props} />
     </div>
   );
 };
@@ -40,11 +40,11 @@ const Navbar = () => {
   const { data: me } = useQuery<{ display_name: string }>("me");
 
   return (
-    <div className="w-full flex flex-row bg-gray-900">
+    <div className="w-full flex flex-row bg-gray-900 border-b border-gray-700">
       <div className="flex-1 flex items-center px-4">
         <span className="font-bold text-2xl">EventSocket</span>
       </div>
-      <div className="space-x-4 flex flex-row bg-gray-900 text-lg">
+      <div className="space-x-4 flex flex-row text-lg">
         {NavbarRoutes.map((r) => (
           <NavbarItem to={r.path} key={r.path}>
             {r.text}

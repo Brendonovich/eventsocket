@@ -1,5 +1,6 @@
 import { useMutation } from "react-query";
 
+import Section from "./Section";
 import { generateAPIKey } from "../../utils/api";
 
 const APIKey = () => {
@@ -9,27 +10,29 @@ const APIKey = () => {
   });
 
   return (
-    <div>
-      <span className="text-2xl font-medium">API Key</span>
-      <p className="mt-1 text-gray-200">
-        Use your API key to make requests to EventSocket from your application.
-        <br />
-        You must keep this confidential.
-        <br />
-        Generating a new API key will invalidate your current key.
-      </p>
+    <Section
+      title="API Key"
+      description="Use your API key to make requests to EventSocket from your application"
+      footer={
+        <>
+          <p className="mr-4 text-gray-400">
+            Generating a new API key will invalidate your current key
+          </p>
+          <button
+            className="bg-white text-black rounded-md px-4 py-1 ml-auto"
+            onClick={() => generate.mutateAsync()}
+          >
+            Generate
+          </button>
+        </>
+      }
+    >
       {generate.data && (
-        <div className="py-2 px-3 bg-gray-900 my-1 rounded-md">
+        <div className="py-2 px-3 bg-gray-900 mt-4 rounded-md border border-gray-700">
           {generate.data}
         </div>
       )}
-      <button
-        className="bg-blue-500 rounded-md px-2 py-1 mt-2"
-        onClick={() => generate.mutateAsync()}
-      >
-        Generate
-      </button>
-    </div>
+    </Section>
   );
 };
 

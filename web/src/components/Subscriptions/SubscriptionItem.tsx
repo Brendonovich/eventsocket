@@ -105,11 +105,11 @@ const Subscription = ({ subscription, id, disabled }: Props) => {
   return (
     <div
       key={subscription.type}
-      className="bg-gray-900 rounded-md px-4 py-4 text-2xl flex justify-between items-start"
+      className="bg-[#111] border border-gray-700 rounded-md p-4 flex justify-between items-start"
     >
       <div className="-my-1">
-        <p>{subscription.name}</p>
-        <p className="text-lg text-gray-400">{subscription.type}</p>
+        <p className="text-2xl">{subscription.name}</p>
+        <p className="text-base text-gray-400">{subscription.type}</p>
       </div>
       <Switch
         checked={checked}

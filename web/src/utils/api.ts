@@ -14,7 +14,6 @@ api.interceptors.response.use(
   (res) => res,
   async ({ response }) => {
     if ([401, 403].includes(response.status)) {
-      console.log('cringe')
       const res = await getAuthRedirect();
 
       document.location.href = res.data;
