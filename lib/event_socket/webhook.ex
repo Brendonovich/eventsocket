@@ -1,5 +1,6 @@
 defmodule EventSocket.Webhook do
-  alias EventSocket.{Env, Subscriptions, Webhook.Event, PubSub, PubSub.Events}
+  alias EventSocket.{Env, Subscriptions, Webhook.Event, PubSub, Events}
+  alias EventSocket.PubSub.Events.User.EventsubNotification
 
   def signature_valid?(headers, raw_data) do
     signature_input =
@@ -24,19 +25,25 @@ defmodule EventSocket.Webhook do
   end
 
   defp handle_event(:notification, %Event{} = event) do
-    case EventSocket.Conditions.deconstruct(event.body["subscription"]["condition"]) do
-      {:ok, user_id, condition} ->
+    case Events.from_twitch(
+           event.headers.subscription_type,
+           event.body["subscription"]["condition"]
+         ) do
+      {type, user_id} ->
+        pubsub_event = %EventsubNotification{
+          type: type,
+          event: event.body["event"],
+          id: event.headers.id
+        }
+
         PubSub.broadcast_user_event!(
           user_id,
-          %Events.User.EventsubNotification{
-            type: event.body["subscription"]["type"],
-            event: event.body["event"],
-            condition: condition,
-            id: event.headers.id
-          }
+          pubsub_event
         )
 
-      {:error, _} ->
+      # EventSocket.Events.create_from_pubsub(user_id, pubsub_event)
+
+      nil ->
         IO.inspect("Failed to deconstruct condition", event.body["subscription"]["condition"])
         # TODO: Handle error
         nil

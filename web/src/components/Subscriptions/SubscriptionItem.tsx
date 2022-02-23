@@ -11,7 +11,6 @@ import {
 export interface Subscription {
   name: string;
   type: string;
-  condition?: object;
 }
 
 interface Props {
@@ -51,18 +50,12 @@ const Subscription = ({ subscription, id, disabled }: Props) => {
   );
 
   const createMutation = useMutation(
-    async ({ type, condition }) => {
-      const res = await createSubscription(type, condition ?? {});
+    async (type) => {
+      const res = await createSubscription(type);
       return res.data;
     },
     {
-      onMutate: async ({
-        type,
-        condition,
-      }: {
-        type: string;
-        condition?: object;
-      }) => {
+      onMutate: async (type: string) => {
         const previousSubscriptions: any[] =
           queryClient.getQueryData("subscriptions")!;
 
@@ -70,8 +63,7 @@ const Subscription = ({ subscription, id, disabled }: Props) => {
           ...(d ?? []),
           {
             type,
-            condition: condition ?? {},
-            id: JSON.stringify({ type, condition }),
+            id: type,
           },
         ]);
 
@@ -83,14 +75,13 @@ const Subscription = ({ subscription, id, disabled }: Props) => {
           context?.previousSubscriptions
         );
       },
-      onSuccess: (data, { type, condition }) => {
+      onSuccess: (data, type) => {
         queryClient.setQueryData("subscriptions", (d?: any[]) => {
           let newSubscriptions = d ? [...d] : [];
 
           newSubscriptions = newSubscriptions.map((s) => {
-            if (s.id === JSON.stringify({ type, condition })) {
-              return { ...s, id: data.id };
-            }
+            if (s.id === type) return { ...s, id: data.id };
+
             return s;
           });
 
@@ -115,11 +106,7 @@ const Subscription = ({ subscription, id, disabled }: Props) => {
         checked={checked}
         onChange={() => {
           if (checked) deleteMutation.mutateAsync(id, {});
-          else
-            createMutation.mutateAsync({
-              type: subscription.type,
-              condition: subscription.condition,
-            });
+          else createMutation.mutateAsync(subscription.type);
         }}
         disabled={
           deleteMutation.isLoading || createMutation.isLoading || disabled

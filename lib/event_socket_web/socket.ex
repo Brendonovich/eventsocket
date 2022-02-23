@@ -95,7 +95,6 @@ defmodule EventSocketWeb.Socket do
       "notification",
       %{
         subscription: %{
-          condition: notification.condition,
           type: notification.type
         },
         event: notification.event

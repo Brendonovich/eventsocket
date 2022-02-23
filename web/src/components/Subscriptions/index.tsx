@@ -33,15 +33,11 @@ const ALL_SUBSCRIPTIONS: Subscription[] = [
   },
   {
     name: "Raid Received",
-    type: "channel.raid",
-    condition: { direction: "to" },
+    type: "channel.raid.receive",
   },
   {
     name: "Raid Given",
-    type: "channel.raid",
-    condition: {
-      direction: "from",
-    },
+    type: "channel.raid.give",
   },
   { name: "Hype Train Begin", type: "channel.hype_train.begin" },
   { name: "Hype Train Progress", type: "channel.hype_train.progress" },
@@ -100,7 +96,7 @@ const Subscriptions = () => {
                 subscription={s}
                 id={matchingSubscription?.id}
                 disabled={isLoading}
-                key={s.type + JSON.stringify(s.condition)}
+                key={s.type}
               />
             );
           })}

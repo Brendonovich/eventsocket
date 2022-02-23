@@ -24,7 +24,6 @@ jobs:
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
 
-
       - name: Build
         run: docker build . -t $IMAGE_NAME
 
