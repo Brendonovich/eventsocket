@@ -110,7 +110,7 @@ In the event that the EventSocket server you are connected to is about to shutdo
 
 ## Self Hosting
 
-If you don't like the idea of all your twitch events passing through my server, create an application in the [Twitch Developer Console](https://dev.twitch.tv/console), and then pull and run the EventSocket API docker image with the following environment variables:
+If you don't like the idea of all your twitch events passing through my server, create an application in the [Twitch Developer Console](https://dev.twitch.tv/console), and then pull and run the [EventSocket API docker image](https://github.com/Brendonovich/eventsocket/pkgs/container/eventsocket-api) with the following environment variables:
 
 - `DATABASE_URL`: Full address to a Postgres database
 - `SECRET_KEY_BASE`: A random string for use in encryption
