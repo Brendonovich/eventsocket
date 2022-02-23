@@ -5,8 +5,8 @@ defmodule EventSocket.Repo.Subscriptions do
   @spec exists?(String.t(), map) :: boolean
   defdelegate exists?(type, condition), to: Access.Subscriptions
 
-  defdelegate create(data), to: Mutations.Subscriptions
-  defdelegate update(type, user_id, condition, data), to: Mutations.Subscriptions
+  defdelegate create(type, user_id), to: Mutations.Subscriptions
+  defdelegate update(type, user_id, data), to: Mutations.Subscriptions
   defdelegate delete_by_id(id), to: Mutations.Subscriptions
-  defdelegate delete_by_hash(hash), to: Mutations.Subscriptions
+  defdelegate delete(type, user_id), to: Mutations.Subscriptions
 end

@@ -31,7 +31,7 @@ defmodule EventSocketWeb.Socket.TerminationRegistry do
   end
 
   @impl true
-  def terminate(reason, state) do
+  def terminate(_reason, state) do
     for pid <- state do
       Socket.notify_shutdown(pid)
     end

@@ -4,28 +4,30 @@ defmodule EventSocket.Repo.Mutations.Subscriptions do
   alias EventSocket.Repo.Schemas.Subscription
   alias EventSocket.Repo
 
-  @spec create(map) :: any
-  def create(data) do
+  @spec create(String.t(), integer()) :: any
+  def create(type, user_id) do
     %Subscription{}
-    |> Subscription.insert_changeset(data)
+    |> Subscription.insert_changeset(%{
+      type: type,
+      user_id: user_id
+    })
     |> Repo.insert()
   end
 
-  @spec update(String.t(), String.t(), map, map) :: any
+  @spec update(String.t(), integer(), map) :: any
   def update(
         type,
         user_id,
-        condition,
         data
       ) do
     %Subscription{
       type: type,
-      condition: condition,
       user_id: user_id
     }
     |> Subscription.edit_changeset(data)
     |> Repo.update()
   end
+
 
   def set_status(id, status) do
     from(s in Subscription, where: s.id == ^id, update: [set: [status: ^status]])
@@ -37,7 +39,7 @@ defmodule EventSocket.Repo.Mutations.Subscriptions do
     from(s in Subscription, where: s.id == ^id) |> Repo.delete_all()
   end
 
-  def delete_by_hash(hash) do
-    from(s in Subscription, where: s.hash == ^hash) |> Repo.delete_all()
+  def delete(type, user_id) do
+    from(s in Subscription, where: s.type == ^type and s.user_id == ^user_id) |> Repo.delete_all()
   end
 end

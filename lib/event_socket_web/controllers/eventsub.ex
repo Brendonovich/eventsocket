@@ -3,11 +3,11 @@ defmodule EventSocketWeb.EventSubController do
 
   alias EventSocket.Subscriptions
 
+  @spec create_subscription(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create_subscription(conn, %{"type" => type} = data) do
     case Subscriptions.create_subscription(
            type,
-           conn.assigns.user_id,
-           data["condition"] || %{}
+           conn.assigns.user_id
          ) do
       {:ok, subscription} -> resp(conn, 200, Jason.encode_to_iodata!(subscription))
       {:error, error} -> resp(conn, 500, Jason.encode_to_iodata!(error))
