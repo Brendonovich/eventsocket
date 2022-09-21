@@ -1,9 +1,4 @@
 {
-  "rewrites": [
-    {
-      "/*": "/"
-    }
-  ],
   "github": {
     "silent": true
   }
