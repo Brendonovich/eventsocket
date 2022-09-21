@@ -1,8 +1,8 @@
-use Mix.Config
+import Config
 
-config :event_socket, :twitch_credentials,
+config :eventsocket, :twitch,
   client_id: "",
   client_secret: ""
 
-config :event_socket,
-  webhook_callback: "https://example.com/webhook"
+config :eventsocket,
+  callback_origin: ""

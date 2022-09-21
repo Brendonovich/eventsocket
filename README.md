@@ -8,7 +8,7 @@ EventSocket provides a WebSocket server that forwards events from EventSub webho
 
 ## How to Use
 
-1. Login to [EventSocket](https://app.eventsocket.brendonovich.dev)
+1. Login to [EventSocket](https://eventsocket.brendonovich.dev)
 2. Go to the settings page and generate an API key. Store it somewhere safe, since it cannot be accessed again after leaving the settings page.
 3. Using a WebSocket client, connect to `https://api.eventsocket.brendonovich.dev?api_key=YOUR_API_KEY`, replacing `YOUR_API_KEY` with the API key generated in step 2
 4. Enable some subscriptions in the Events tab on the website

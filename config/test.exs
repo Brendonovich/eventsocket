@@ -8,15 +8,20 @@ import Config
 config :eventsocket, EventSocket.Repo,
   username: "postgres",
   password: "postgres",
-  database: "eventsocket_test#{System.get_env("MIX_TEST_PARTITION")}",
   hostname: "localhost",
-  pool: Ecto.Adapters.SQL.Sandbox
+  database: "eventsocket_test#{System.get_env("MIX_TEST_PARTITION")}",
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: 10
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :eventsocket, EventSocketWeb.Endpoint,
-  http: [port: 4002],
+  http: [ip: {127, 0, 0, 1}, port: 4002],
+  secret_key_base: "RfIM1d4LkEvLfrHU1miRpBKuNdzXBa4O6zPa8lu+tKnxTSiUvsprr+XTAX/myOee",
   server: false
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+# Initialize plugs at runtime for faster test compilation
+config :phoenix, :plug_init_mode, :runtime

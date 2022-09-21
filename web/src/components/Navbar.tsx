@@ -1,61 +1,55 @@
-import { ReactNode } from "react";
-import { Link, useMatchRoute } from "react-location";
+import { createQuery } from "@adeora/solid-query";
+import { Link, useMatch } from "@solidjs/router";
+import { JSXElement } from "solid-js";
+import { For } from "solid-js/web";
 import clsx from "clsx";
-import { useMutation, useQuery } from "react-query";
-import { logout } from "../utils/api";
 
-const NavbarRoutes = [
+export const NavBarRoutes = [
   {
-    path: "/subscriptions",
+    href: "/subscriptions",
     text: "Subscriptions",
   },
+  // {
+  //   href: "/events",
+  //   text: "Events",
+  // },
   {
-    path: "/events",
-    text: "Events",
-  },
-  {
-    path: "/settings",
+    href: "/settings",
     text: "Settings",
   },
 ];
 
-const NavbarItem = (props: { to: string; children: ReactNode }) => {
-  const matchRoute = useMatchRoute();
-
-  const match = matchRoute({ to: props.to });
+const NavBarItem = (props: { href: string; children: JSXElement }) => {
+  const match = useMatch(() => props.href);
 
   return (
     <div
-      className={clsx(
+      class={clsx(
         "font-medium border-b-2 border-transparent py-4 transition-colors",
-        match && "border-white"
+        match() && "border-white"
       )}
     >
-      <Link className="bg-opacity-40 p-2 rounded-md" {...props} />
+      <Link class="bg-opacity-40 p-2 rounded-md" {...props} />
     </div>
   );
 };
 
-const Navbar = () => {
-  const { data: me } = useQuery<{ display_name: string }>("me");
+export const NavBar = () => {
+  const me = createQuery<any>(() => ["me"]);
 
   return (
-    <div className="w-full flex flex-row bg-gray-900 border-b border-gray-700">
-      <div className="flex-1 flex items-center px-4">
-        <span className="font-bold text-2xl">EventSocket</span>
+    <div class="w-full flex flex-row bg-gray-900 border-b border-gray-700">
+      <div class="flex-1 flex items-center px-4">
+        <span class="font-bold text-2xl">EventSocket</span>
       </div>
-      <div className="space-x-4 flex flex-row text-lg">
-        {NavbarRoutes.map((r) => (
-          <NavbarItem to={r.path} key={r.path}>
-            {r.text}
-          </NavbarItem>
-        ))}
+      <div class="space-x-4 flex flex-row text-lg">
+        <For each={NavBarRoutes}>
+          {(r) => <NavBarItem href={r.href}>{r.text}</NavBarItem>}
+        </For>
       </div>
-      <div className="flex items-center justify-end px-4 space-x-4 flex-1">
-        <span className="text-xl">{me!.display_name}</span>
+      <div class="flex items-center justify-end px-4 space-x-4 flex-1">
+        <span class="text-xl">{me!.data.display_name}</span>
       </div>
     </div>
   );
 };
-
-export default Navbar;

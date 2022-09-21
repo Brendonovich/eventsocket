@@ -1,10 +1,9 @@
-import { Route } from "react-location";
+import { RouteDefinition } from "@solidjs/router";
+import { lazy } from "solid-js";
 
-import Callback from "./Callback";
-
-export default [
+export const routes: RouteDefinition[] = [
   {
     path: "callback",
-    element: <Callback />,
+    element: lazy(() => import("./Callback")),
   },
-] as Route[];
+];

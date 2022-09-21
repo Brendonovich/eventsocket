@@ -1,26 +1,31 @@
-import { useMutation, useQuery } from "react-query";
-import { logout } from "../../utils/api";
+import { createQuery, createMutation } from "@adeora/solid-query";
+import { useNavigate } from "@solidjs/router";
+import { logout, queryClient } from "../../utils/api";
 import Section from "./Section";
 
-const Account = () => {
-  const { data: me } = useQuery<{ display_name: string }>("me");
+export const Account = () => {
+  const me = createQuery<{ display_name: string }>(() => ["me"]);
+  const navigate = useNavigate() 
 
-  const logoutMutation = useMutation(async () => {
+  const logoutMutation = createMutation(async () => {
     await logout();
-    window.location.reload();
+    queryClient.invalidateQueries(["me"])
+    navigate("/")
   });
+
+  if (!me.data) return null;
 
   return (
     <Section
       title="Account"
       description={
         <>
-          Currently logged in as <strong>{me!.display_name}</strong>
+          Currently logged in as <strong>{me.data.display_name}</strong>
         </>
       }
       footer={
         <button
-          className="bg-red-600 px-4 py-1 rounded-lg ml-auto"
+          class="bg-red-600 px-4 py-1 rounded-lg ml-auto"
           onClick={() => logoutMutation.mutate()}
         >
           Logout
@@ -29,5 +34,3 @@ const Account = () => {
     />
   );
 };
-
-export default Account;

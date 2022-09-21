@@ -1,71 +1,94 @@
-# STEP 1 - BUILD RELEASE 
-FROM elixir:1.12-alpine AS deps-getter
+# Find eligible builder and runner images on Docker Hub. We use Ubuntu/Debian instead of
+# Alpine to avoid DNS resolution issues in production.
+#
+# https://hub.docker.com/r/hexpm/elixir/tags?page=1&name=ubuntu
+# https://hub.docker.com/_/ubuntu?tab=tags
+#
+#
+# This file is based on these images:
+#
+#   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
+#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20220801-slim - for the release image
+#   - https://pkgs.org/ - resource for finding needed packages
+#   - Ex: hexpm/elixir:1.14.0-erlang-25.0.4-debian-bullseye-20210902-slim
+#
+ARG ELIXIR_VERSION=1.14.0
+ARG OTP_VERSION=25.0.4
+ARG DEBIAN_VERSION=bullseye-20220801-slim
 
-RUN mkdir /app
+ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
+ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
+
+FROM ${BUILDER_IMAGE} as builder
+
+# install build dependencies
+RUN apt-get update -y && apt-get install -y build-essential git \
+    && apt-get clean && rm -f /var/lib/apt/lists/*_*
+
+# prepare build dir
 WORKDIR /app
 
-# Install build dependencies
-RUN apk update && \
-    apk upgrade --no-cache && \
-    apk add --no-cache \
-    build-base && \
-    mix local.hex --force && \
-    mix local.rebar --force 
+# install hex + rebar
+RUN mix local.hex --force && \
+    mix local.rebar --force
 
-ENV MIX_ENV=prod
+# set build ENV
+ENV MIX_ENV="prod"
 
-# install deps and compile deps
-COPY mix.exs /app/mix.exs
-COPY mix.lock /app/mix.lock
-RUN mix do deps.get --only $MIX_ENV, deps.compile
+# install mix dependencies
+COPY mix.exs mix.lock ./
+RUN mix deps.get --only $MIX_ENV
+RUN mkdir config
+
+# copy compile-time config files before we compile dependencies
+# to ensure any relevant config change will trigger the dependencies
+# to be re-compiled.
+COPY config/config.exs config/${MIX_ENV}.exs config/
+RUN mix deps.compile
+
+COPY priv priv
+
+COPY lib lib
+
+# Compile the release
 RUN mix compile
 
-################################################################################
-# STEP 2 - RELEASE BUILDER
-FROM elixir:1.12-alpine  AS release-builder
+# Changes to config/runtime.exs don't require recompiling the code
+COPY config/runtime.exs config/
 
-ENV MIX_ENV=prod
+COPY rel rel
+RUN mix release
 
-RUN mkdir /app
-WORKDIR /app
+# start a new build stage so that the final image will only contain
+# the compiled release and other runtime necessities
+FROM ${RUNNER_IMAGE}
 
-# need to install deps again to run mix phx.digest
-RUN apk update && \
-    apk upgrade --no-cache && \
-    apk add --no-cache \
-    git \
-    build-base && \
-    mix local.rebar --force && \
-    mix local.hex --force
+RUN apt-get update -y && apt-get install -y libstdc++6 openssl libncurses5 locales \
+  && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
-# copy elixir deps
-COPY --from=deps-getter /app /app
+# Set the locale
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 
-# copy config, priv and release directories
-COPY config /app/config
-COPY priv /app/priv
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
-# copy application code
-COPY lib /app/lib
+WORKDIR "/app"
+RUN chown nobody /app
 
-# create release
-RUN mkdir -p /opt/built &&\
-    mix release &&\
-    cp -r _build/prod/rel/eventsocket /opt/built
+# set runner ENV
+ENV MIX_ENV="prod"
 
-################################################################################
-## STEP 3 - FINAL
-FROM alpine:3.11.3
+# Only copy the final release from the build stage
+COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/eventsocket ./
 
-ENV MIX_ENV=prod
+USER nobody
 
-RUN apk upgrade --no-cache && \
-    apk add --no-cache bash openssl libgcc libstdc++ ncurses-libs
+CMD ["/app/bin/server"]
+# Appended by flyctl
+ENV ECTO_IPV6 true
+ENV ERL_AFLAGS "-proto_dist inet6_tcp"
 
-COPY --from=release-builder /opt/built /app
-COPY Procfile /app
-WORKDIR /app
-
-EXPOSE 4000
-
-CMD ["/app/eventsocket/bin/eventsocket", "start"]
+# Appended by flyctl
+ENV ECTO_IPV6 true
+ENV ERL_AFLAGS "-proto_dist inet6_tcp"

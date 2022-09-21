@@ -1,35 +1,30 @@
-import { Outlet, useMatchRoute } from "react-location";
-import { useQuery } from "react-query";
+import { useMatch, useRoutes } from "@solidjs/router";
+import { Show } from "solid-js";
+import { createQuery } from "@adeora/solid-query";
 
-import { getMe } from "./utils/api";
-import Navbar from "./components/Navbar";
+import { createMeQuery, getMe } from "./utils/api";
+import { NavBar } from "./components/NavBar";
+import { routes } from "./components/routes";
 
-function App() {
-  const routeMatch = useMatchRoute();
+export const App = () => {
+  const Routes = useRoutes(routes)
 
-  const isUnauthedRoute = !!routeMatch({ to: "auth/*" });
+  const isAuthRoute = useMatch(() => "auth/*");
+  const isRoot = useMatch(() => "/")
 
-  const { isLoading } = useQuery(
-    "me",
-    async () => {
-      const res = await getMe();
-      return res.data;
-    },
-    { enabled: !isUnauthedRoute }
-  );
+  const me = createMeQuery({ enabled: !isAuthRoute() });
+
+  const showRoutes = () => isRoot() || isAuthRoute() || !me.isLoading;
+  const isNavBarRoute = () => !(isRoot() || isAuthRoute())
 
   return (
-    <div className="bg-black w-screen h-screen text-white flex flex-col">
-      {isUnauthedRoute ? (
-        <Outlet />
-      ) : isLoading ? null : (
-        <>
-          <Navbar />
-          <Outlet />
-        </>
-      )}
+    <div class="bg-black w-screen h-screen text-white flex flex-col">
+      <Show when={showRoutes()} fallback={null}>
+        <Show when={!me.isLoading && isNavBarRoute()}>
+          <NavBar />
+        </Show>
+        <Routes/>
+      </Show>
     </div>
   );
-}
-
-export default App;
+};

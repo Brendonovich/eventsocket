@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "react-query";
-
+import { createQuery } from "@adeora/solid-query";
+import { createSignal, For } from "solid-js";
 import { getSubscriptions } from "../../utils/api";
 import SubscriptionItem, { Subscription } from "./SubscriptionItem";
 
@@ -62,48 +61,44 @@ const ALL_SUBSCRIPTIONS: Subscription[] = [
   { name: "Channel Updated", type: "channel.update" },
 ];
 
-const Subscriptions = () => {
-  const [search, setSearch] = useState("");
+export default () => {
+  const [search, setSearch] = createSignal("");
 
-  const { data, isLoading } = useQuery("subscriptions", async () => {
-    const res = await getSubscriptions();
-    return res.data;
-  });
+  const subscriptions = createQuery(() => ["subscriptions"], () => getSubscriptions().then(r => r.data));
 
-  let lowercaseSearch = search.toLowerCase();
+  const lowercaseSearch = () => search().toLowerCase();
 
   return (
-    <div className="overflow-y-hidden flex-1">
-      <div className="py-2 overflow-y-auto h-full px-2">
-        <div className="flex flex-col space-y-2 w-full max-w-3xl mx-auto">
+    <div class="overflow-y-hidden flex-1">
+      <div class="py-2 overflow-y-auto h-full px-2">
+        <div class="flex flex-col space-y-2 w-full max-w-3xl mx-auto">
           <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={search()}
+            onInput={(e) => setSearch((e.target as any).value)}
             placeholder="Search Subscriptions"
-            className="bg-gray-600 py-2 px-4 text-lg rounded-lg focus:outline-none focus:ring-indigo-600 ring-2 ring-transparent"
+            class="bg-gray-600 py-2 px-4 text-lg rounded-lg focus:outline-none focus:ring-indigo-600 ring-2 ring-transparent"
           />
-          {ALL_SUBSCRIPTIONS.filter(
+          <For each={ALL_SUBSCRIPTIONS.filter(
             (s) =>
-              s.name.toLowerCase().includes(lowercaseSearch) ||
-              s.type.toLowerCase().includes(lowercaseSearch)
-          ).map((s) => {
-            const matchingSubscription = data?.find(
-              (sub) => sub.type === s.type
-            );
+              s.name.toLowerCase().includes(lowercaseSearch()) ||
+              s.type.toLowerCase().includes(lowercaseSearch())
+          )}>
+            {(s) => {
+              const matchingSubscription = () => subscriptions.data?.find(
+                (sub) => sub.type === s.type
+              );
 
-            return (
-              <SubscriptionItem
-                subscription={s}
-                id={matchingSubscription?.id}
-                disabled={isLoading}
-                key={s.type}
-              />
-            );
-          })}
+              return (
+                <SubscriptionItem
+                  subscription={s}
+                  id={matchingSubscription()?.id}
+                  disabled={subscriptions.isLoading}
+                />
+              );
+            }}
+          </For>
         </div>
       </div>
     </div>
   );
 };
-
-export default Subscriptions;

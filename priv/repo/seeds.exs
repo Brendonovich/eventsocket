@@ -10,9 +10,9 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-alias EventSocket.Repo.Schemas
+alias EventSocket.Repo.Schema
 
-EventSocket.Repo.insert!(%Schemas.User{
+EventSocket.Repo.insert!(%Schema.User{
   display_name: "Brendonovich",
   id: 53_168_490,
   api_key_hash: :erlang.phash2("0")

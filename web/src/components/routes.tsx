@@ -1,21 +1,23 @@
-import { Route, useNavigate } from "react-location";
-import AuthRoutes from "./Auth/routes";
-import Subscriptions from "./Subscriptions";
-import Settings from "./Settings";
-import Events from "./Events";
+import { RouteDefinition } from "@solidjs/router";
+import { lazy } from "solid-js";
 
-const Redirect = ({ to }: { to: string }) => {
-  useNavigate()({ to });
-  return null;
-};
+import { routes as AuthRoutes } from "./Auth/routes";
 
-export default [
-  { path: "auth", children: AuthRoutes },
-  { path: "subscriptions", element: <Subscriptions /> },
-  { path: "settings", element: <Settings /> },
-  { path: "events", element: <Events /> },
+export const routes: RouteDefinition[] = [
+  {
+    path: "/auth",
+    children: AuthRoutes
+  },
+  {
+    path: "/subscriptions",
+    component: lazy(() => import("./Subscriptions"))
+  },
+  {
+    path: "/settings",
+    component: lazy(() => import("./Settings"))
+  },
   {
     path: "/",
-    element: <Redirect to="/subscriptions" />,
+    component: lazy(() => import("./")),
   },
-] as Route[];
+];

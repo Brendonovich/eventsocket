@@ -2,25 +2,29 @@ import Config
 
 # Configure your database
 config :eventsocket, EventSocket.Repo,
-  username: "eventsocket",
-  password: "eventsocket",
-  database: "eventsocket",
-  hostname: "db",
+  username: "postgres",
+  password: "postgrespw",
+  hostname: "localhost",
+  database: "postgres",
+  port: 55000,
+  stacktrace: true,
   show_sensitive_data_on_connection_error: true,
-  pool_size: 10,
-  port: 5432
+  pool_size: 10
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
-# with webpack to recompile .js and .css sources.
+# with esbuild to bundle .js and .css sources.
 config :eventsocket, EventSocketWeb.Endpoint,
-  http: [port: 4000],
-  debug_errors: true,
-  code_reloader: true,
+  # Binding to loopback ipv4 address prevents access from other machines.
+  # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
+  http: [ip: {127, 0, 0, 1}, port: 4000],
   check_origin: false,
+  code_reloader: true,
+  debug_errors: true,
+  secret_key_base: "NRI/ETJRDz1IJWMJAR3pA++TEKFQVZY6pTS9Tz26AMnqYhxADgjXVPoOqBeE6EMU",
   watchers: []
 
 # ## SSL Support
