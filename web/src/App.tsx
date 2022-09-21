@@ -1,8 +1,7 @@
 import { useMatch, useRoutes } from "@solidjs/router";
 import { Show } from "solid-js";
-import { createQuery } from "@adeora/solid-query";
 
-import { createMeQuery, getMe } from "./utils/api";
+import { createMeQuery } from "./utils/api";
 import { NavBar } from "./components/NavBar";
 import { routes } from "./components/routes";
 

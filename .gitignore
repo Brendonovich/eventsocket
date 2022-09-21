@@ -29,4 +29,3 @@ eventsocket-*.tar
 
 .env*
 .DS_Store
-fly.toml

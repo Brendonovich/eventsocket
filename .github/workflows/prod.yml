@@ -3,82 +3,60 @@ name: API CD
 on:
   push:
     branches:
-      - master
+      - main
     paths-ignore:
       - "web/**"
 
 env:
-  IMAGE_NAME: eventsocket-api
+  FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+#   IMAGE_NAME: eventsocket-api
 
 jobs:
-  build-prod:
-    name: Build to GHCR
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - name: Pull
-        uses: actions/checkout@v2
-        
-      - name: Setup Docker Layer Caching
-        uses: satackey/action-docker-layer-caching@v0.0.11
-        # Ignore the failure of a step and avoid terminating the job.
-        continue-on-error: true
+  # build-prod:
+  #   name: Build to GHCR
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/master'
+  #   steps:
+  #     - name: Pull
+  #       uses: actions/checkout@v2
+  #       
+  #     - name: Setup Docker Layer Caching
+  #       uses: satackey/action-docker-layer-caching@v0.0.11
+  #       # Ignore the failure of a step and avoid terminating the job.
+  #       continue-on-error: true
 
-      - name: Build
-        run: docker build . -t $IMAGE_NAME
+  #     - name: Build
+  #       run: docker build . -t $IMAGE_NAME
 
-      - name: Login to GHCR
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+  #     - name: Login to GHCR
+  #       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Push to GHCR
-        id: push
-        run: |
-          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+  #     - name: Push to GHCR
+  #       id: push
+  #       run: |
+  #         IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
 
-          # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
-          echo "::set-output name=image-digest::$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE_ID:$VERSION)"
+  #         # Change all uppercase to lowercase
+  #         IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+  #         # Strip git ref prefix from version
+  #         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+  #         # Strip "v" prefix from tag name
+  #         [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+  #         # Use Docker `latest` tag convention
+  #         [ "$VERSION" == "master" ] && VERSION=latest
+  #         echo IMAGE_ID=$IMAGE_ID
+  #         echo VERSION=$VERSION
+  #         docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+  #         docker push $IMAGE_ID:$VERSION
+  #         echo "::set-output name=image-digest::$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE_ID:$VERSION)"
 
   deploy-prod:
     name: Deploy
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
     environment:
       name: API Production
       url: "https://api.eventsocket.brendonovich.dev"
-    needs: [build-prod]
     steps:
-      - name: Setup SSH
-        run: |
-          echo "Setting up SSH Key"
-
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DOKKU_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          chmod 700 ~/.ssh
-
-          ssh_port=22
-          ssh_host=${{ secrets.DOKKU_REMOTE_URL }}
-
-          echo "Generating SSH_HOST_KEY from ssh-keyscan against $ssh_host:$ssh_port"
-          ssh-keyscan -H -p "$ssh_port" "$ssh_host" >> ~/.ssh/known_hosts
-
-          echo "Adding SSH Key to ssh-agent"
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa
-
-      - name: Deploy
-        run: |
-          ssh root@${{ secrets.DOKKU_REMOTE_URL }} docker pull ghcr.io/brendonovich/eventsocket-api:latest
-          ssh dokku@${{ secrets.DOKKU_REMOTE_URL }} git:from-image ${{ secrets.DOKKU_APP_NAME }} ghcr.io/brendonovich/eventsocket-api:latest
-          ssh dokku@${{ secrets.DOKKU_REMOTE_URL }} ps:rebuild ${{ secrets.DOKKU_APP_NAME }}
+      - uses: actions/checkout@v2
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
