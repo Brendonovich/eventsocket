@@ -15,9 +15,9 @@ defmodule EventSocketWeb.Endpoint do
   socket("/socket", EventSocketWeb.Socket,
     websocket: [
       path: "/",
-      timeout: :infinity
-    ],
-    check_origin: false
+      timeout: :infinity,
+      check_origin: false
+    ]
   )
 
   plug(CORSPlug, origin: ["http://localhost:3000", "https://eventsocket.brendonovich.dev"])
